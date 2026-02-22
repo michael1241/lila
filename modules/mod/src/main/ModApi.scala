@@ -124,6 +124,7 @@ final class ModApi(
     withUser(username): user =>
       user.enabled.no.so:
         for _ <- userRepo.reopen(user.id)
+            _ <- userRepo.unsetForeverClosed(user.id)
         yield
           Bus.pub(lila.core.security.ReopenAccount(user))
           logApi.reopenAccount(user.id)

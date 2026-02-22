@@ -354,6 +354,14 @@ final class UserRepo(c: Coll)(using Executor) extends lila.core.user.UserRepo(c)
         .void
         .recover(lila.db.recoverDuplicateKey(_ => ()))
 
+  def unsetForeverClosed(id: UserId): Funit =
+    coll.update
+      .one(
+        $id(id),
+        $doc("$unset" -> $doc(F.foreverClosed -> true))
+      )
+      .void
+
   def disable(user: User, keepEmail: Boolean, forever: Boolean): Funit =
     val sets = $doc(F.enabled -> false).++(forever.so($doc(F.foreverClosed -> true)))
     val unsets = List(F.roles.some, keepEmail.option(F.mustConfirmEmail)).flatten
